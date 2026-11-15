@@ -4,26 +4,40 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
+    "@react-three/postprocessing": "^3.2.2",
     "framer-motion": "^14.14.0",
     "next": "^15.5.29",
+    "postprocessing": "^6.39.6",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "three": "^0.187.0"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.7",
+    "@playwright/test": "^1.65.1",
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@types/three": "^0.187.0",
     "autoprefixer": "^10.6.2",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.29",
+    "leva": "^0.10.1",
     "postcss": "^8.5.33",
     "tailwindcss": "^3.4.19",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^5.1.0"
   },
   "private": true
 }

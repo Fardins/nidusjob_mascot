@@ -1,14 +1,7 @@
 "use client";
 
 import { motion, type Variants } from "framer-motion";
-import { useEffect } from "react";
-import {
-  MascotStage,
-  mascotStore,
-  useMascot,
-  EXPRESSION_NAMES,
-  type ExpressionName,
-} from "@/components/mascot";
+import { MascotSlot, mascot, mascotStore, useMascot, EXPRESSION_META, type ExpressionName } from "@/components/mascot";
 
 const container: Variants = {
   hidden: {},
@@ -19,54 +12,50 @@ const item: Variants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } },
 };
 
-const LABELS: Record<ExpressionName, string> = {
-  neutral: "Calm",
-  happy: "Happy",
-  curious: "Curious",
-  surprised: "Surprised",
-  thinking: "Thinking",
-  excited: "Excited",
-};
+const MOODS: ExpressionName[] = ["happy", "curious", "excited", "thinking", "laughing", "winking", "shy", "sad", "surprised", "confused"];
 
 /** Hovering a CTA makes the mascot look at it with an expression. */
 function useAttention(expression: ExpressionName, line?: string) {
   return {
     onMouseEnter: (e: React.MouseEvent<HTMLElement>) => {
-      mascotStore.lookAtElement(e.currentTarget);
+      mascot.lookAt(e.currentTarget);
       mascotStore.setExpression(expression);
-      if (line) mascotStore.say(line, 2000);
+      if (line) mascot.say(line, { durationMs: 2000 });
     },
     onMouseLeave: () => {
-      mascotStore.lookAtElement(null);
-      mascotStore.setExpression("happy");
+      mascot.lookAt(null);
+      mascotStore.clearExpression();
     },
-    onFocus: (e: React.FocusEvent<HTMLElement>) => mascotStore.lookAtElement(e.currentTarget),
-    onBlur: () => mascotStore.lookAtElement(null),
+    onFocus: (e: React.FocusEvent<HTMLElement>) => mascot.lookAt(e.currentTarget),
+    onBlur: () => mascot.lookAt(null),
   };
 }
 
 function ExpressionChips() {
   const current = useMascot((s) => s.expression);
   return (
-    <div className="flex flex-wrap gap-2" role="group" aria-label="Mascot mood">
-      {EXPRESSION_NAMES.map((name) => (
+    <div className="flex flex-wrap justify-center gap-2 lg:justify-start" role="group" aria-label="Mascot mood">
+      {MOODS.map((name) => (
         <button
           key={name}
           type="button"
           onClick={() => {
-            mascotStore.setExpression(name, 4000, "happy");
-            if (name === "excited") mascotStore.trigger("jump");
-            if (name === "surprised") mascotStore.trigger("squash");
-            if (name === "thinking") mascotStore.trigger("nod");
+            mascotStore.setExpression(name, 4000);
+            if (name === "excited") mascot.react("jump");
+            if (name === "surprised") mascot.react("squash");
+            if (name === "thinking") mascot.react("nod");
+            if (name === "laughing") mascot.react("laugh");
+            if (name === "winking") mascot.react("wink");
+            if (name === "confused") mascot.react("shrug");
           }}
           aria-pressed={current === name}
-          className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
+          className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 ${
             current === name
               ? "border-brand-500 bg-brand-500 text-white shadow-md shadow-brand-500/30"
               : "border-slate-200 bg-white/70 text-ink-soft hover:border-brand-300 hover:text-ink"
           }`}
         >
-          {LABELS[name]}
+          {EXPRESSION_META[name].label}
         </button>
       ))}
     </div>
@@ -76,15 +65,6 @@ function ExpressionChips() {
 export function Hero() {
   const primary = useAttention("excited", "Ooh, let's go!");
   const secondary = useAttention("curious");
-
-  // Friendly greeting shortly after load.
-  useEffect(() => {
-    const id = setTimeout(() => {
-      mascotStore.trigger("wave");
-      mascotStore.say("Hi! I'm Nidus, your AI companion.", 3200);
-    }, 1400);
-    return () => clearTimeout(id);
-  }, []);
 
   return (
     <section className="relative isolate min-h-[100svh] overflow-hidden bg-gradient-to-b from-brand-50 via-white to-white">
@@ -105,7 +85,7 @@ export function Hero() {
           <a href="#" className="hover:text-ink">Product</a>
           <a href="#" className="hover:text-ink">Solutions</a>
           <a href="#" className="hover:text-ink">Pricing</a>
-          <a href="#" className="hover:text-ink">Docs</a>
+          <a href="/showcase" className="hover:text-ink">Showcase</a>
         </nav>
         <a href="#" className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-white hover:bg-ink/90">
           Sign in
@@ -129,24 +109,25 @@ export function Hero() {
           </motion.h1>
 
           <motion.p variants={item} className="mx-auto mt-5 max-w-xl text-base text-ink-soft sm:text-lg lg:mx-0">
-            A friendly, always-curious companion that learns how you work, answers in seconds and
-            keeps your team moving. Go ahead — say hi. It’s watching your cursor.
+            A friendly, always-curious companion that learns how you work, answers in seconds and keeps your team moving. Go ahead —
+            say hi. It’s watching your cursor.
           </motion.p>
 
           <motion.div variants={item} className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
-            <a
-              href="#"
+            <button
+              type="button"
               {...primary}
-              className="w-full rounded-full bg-brand-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 transition hover:-translate-y-0.5 hover:bg-brand-600 sm:w-auto"
+              onClick={() => mascot.setChatOpen(true, "button")}
+              className="w-full rounded-full bg-brand-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 transition hover:-translate-y-0.5 hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 sm:w-auto"
             >
-              Start for free
-            </a>
+              Chat with Nidus
+            </button>
             <a
-              href="#"
+              href="/showcase"
               {...secondary}
               className="w-full rounded-full border border-slate-200 bg-white/80 px-6 py-3 text-sm font-semibold text-ink backdrop-blur transition hover:-translate-y-0.5 hover:border-brand-300 sm:w-auto"
             >
-              Watch demo
+              See every expression
             </a>
           </motion.div>
 
@@ -156,15 +137,15 @@ export function Hero() {
           </motion.div>
         </motion.div>
 
-        {/* mascot */}
+        {/* the site-wide mascot (MascotHost) flies into this slot while it's on screen */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
           className="order-1 lg:order-2"
         >
-          <MascotStage className="mx-auto aspect-square w-full max-w-[22rem] sm:max-w-[30rem] lg:max-w-none" />
-          <p className="-mt-2 text-center text-xs text-slate-400">Click, tap or drag to play</p>
+          <MascotSlot className="mx-auto aspect-square w-full max-w-[22rem] sm:max-w-[30rem] lg:max-w-none" />
+          <p className="-mt-2 text-center text-xs text-slate-400">Click to chat · drag to spin · rub to pet</p>
         </motion.div>
       </div>
     </section>
