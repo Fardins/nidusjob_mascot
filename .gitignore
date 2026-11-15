@@ -3,3 +3,8 @@ node_modules
 next-env.d.ts
 *.tsbuildinfo
 .venv
+
+.env*.local
+.env
+test-results
+playwright-report

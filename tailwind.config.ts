@@ -19,6 +19,10 @@ const config: Config = {
       },
       fontFamily: { sans: ["var(--font-sans)", "system-ui", "sans-serif"] },
       keyframes: {
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-3%)" },
+        },
         "pulse-ring": {
           "0%": { transform: "scale(0.9)", opacity: "0.6" },
           "100%": { transform: "scale(1.25)", opacity: "0" },

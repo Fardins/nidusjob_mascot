@@ -12,7 +12,18 @@ import type { ExpressionName } from "../expressions";
  * `?plush-debug` to log what was detected, then adjust these lists.
  */
 
-export const PLUSH_MODEL_URL = "/models/plush.glb";
+/**
+ * Model assets. Only `rigged` is ever loaded as the live character.
+ * `staticExport` is the frozen, unrigged export of the procedural mascot
+ * (made with `?export-glb` + Shift+E) for Blender / other engines — loading
+ * it here would replace the fully rigged character with a statue.
+ */
+export const MODEL_ASSETS = {
+  rigged: "/models/plush.glb",
+  staticExport: "/models/nidus-mascot.glb",
+} as const;
+
+export const PLUSH_MODEL_URL = MODEL_ASSETS.rigged;
 
 /** Self-hosted decoders copied from three/examples/jsm/libs (same version as three). */
 export const DECODER_PATHS = {
@@ -180,6 +191,21 @@ export const EXPRESSION_MORPHS: Record<ExpressionName, Record<string, number>> =
     smile: 1,
     excited: 1,
   },
+  listening: { browinnerup: 0.25, eyewideleft: 0.25, eyewideright: 0.25, mouthsmileleft: 0.4, mouthsmileright: 0.4 },
+  explaining: { browinnerup: 0.2, mouthsmileleft: 0.5, mouthsmileright: 0.5, browouterupleft: 0.15, browouterupright: 0.15 },
+  speaking: { mouthsmileleft: 0.45, mouthsmileright: 0.45 },
+  laughing: { eyeblinkleft: 0.7, eyeblinkright: 0.7, mouthsmileleft: 1, mouthsmileright: 1, jawopen: 0.55, cheeksquintleft: 0.9, cheeksquintright: 0.9 },
+  winking: { eyeblinkright: 1, cheeksquintright: 0.7, mouthsmileleft: 0.5, mouthsmileright: 0.9, browouterupleft: 0.3 },
+  celebrating: { eyesquintleft: 0.7, eyesquintright: 0.7, mouthsmileleft: 1, mouthsmileright: 1, jawopen: 0.4, cheeksquintleft: 0.8, cheeksquintright: 0.8 },
+  confused: { browouterupleft: 0.7, browdownright: 0.4, mouthleft: 0.5, mouthpressright: 0.3, eyesquintright: 0.3 },
+  error: { browinnerup: 0.9, eyewideleft: 0.6, eyewideright: 0.6, mouthfrownleft: 0.5, mouthfrownright: 0.5 },
+  sad: { browinnerup: 0.9, mouthfrownleft: 0.7, mouthfrownright: 0.7, eyelookdownleft: 0.4, eyelookdownright: 0.4, mouthpucker: 0.15 },
+  drowsy: { eyeblinkleft: 0.5, eyeblinkright: 0.5, mouthsmileleft: 0.1, mouthsmileright: 0.1 },
+  sleeping: { eyeblinkleft: 1, eyeblinkright: 1, jawopen: 0.12, mouthfunnel: 0.2 },
+  welcome: { browinnerup: 0.5, browouterupleft: 0.5, browouterupright: 0.5, mouthsmileleft: 1, mouthsmileright: 1, cheeksquintleft: 0.5, cheeksquintright: 0.5 },
+  goodbye: { browinnerup: 0.4, mouthsmileleft: 0.55, mouthsmileright: 0.55 },
+  shy: { mouthsmileleft: 0.6, mouthsmileright: 0.6, eyelookdownleft: 0.4, eyelookdownright: 0.4, cheekpuff: 0.2, browinnerup: 0.3 },
+  dizzy: { browinnerup: 0.4, mouthleft: 0.4, jawopen: 0.15, eyesquintleft: 0.2 },
 };
 
 /** Expressions that also play a body clip (looping/held while active). */

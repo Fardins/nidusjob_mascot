@@ -16,13 +16,25 @@ const rand = (a: number, b: number) => a + Math.random() * (b - a);
 const pick = <T,>(xs: T[]) => xs[Math.floor(Math.random() * xs.length)];
 
 /** Store reactions → body clips. */
-const REACTION_CLIPS: Record<ReactionName, ClipState> = {
+const REACTION_CLIPS: Partial<Record<ReactionName, ClipState>> = {
   jump: "happy_bounce",
   wave: "wave",
   spin: "happy_bounce",
   nod: "talk_gesture",
   shake: "shy",
   squash: "surprised",
+  hop: "happy_bounce",
+  doubleHop: "happy_bounce",
+  spinJump: "happy_bounce",
+  celebrate: "happy_bounce",
+  startle: "surprised",
+  flinch: "surprised",
+  shrug: "shy",
+  giggle: "shy",
+  curiousTilt: "look_around",
+  lookAround: "look_around",
+  tapWrist: "thinking",
+  scratchHead: "thinking",
 };
 
 /** Procedural stand-ins when a clip is missing (or reduced motion is on). Duration in s. */
@@ -179,7 +191,7 @@ export function useLocomotionBrain(o: Options): LocomotionBrain {
 
     function react(name: ReactionName, t: number) {
       const r = reducedMotion && name === "spin" ? "nod" : name;
-      play(REACTION_CLIPS[r], t, r === "spin" ? "spin" : r === "nod" ? "nod" : undefined);
+      play(REACTION_CLIPS[r] ?? "talk_gesture", t, r === "spin" ? "spin" : r === "nod" ? "nod" : undefined);
     }
 
     /* ------------------------------------------------------- public API */
