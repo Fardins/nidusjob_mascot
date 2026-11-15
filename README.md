@@ -62,7 +62,10 @@ const mood = useMascot((s) => s.expression);  // subscribe in React UI
 
 - three.js is code-split out of first load (`/` ships about 157 kB of JS; the 3D chunk loads after hydration).
 - Rendering pauses when the hero scrolls off-screen. `PerformanceMonitor` and `AdaptiveDpr` lower resolution on weak GPUs.
-- All geometry and materials are created once and shared. Nothing is downloaded: no textures, HDRs or models.
+- All geometry and materials are created once and shared. The procedural mascot downloads nothing. The plush
+  character downloads only `plush.glb` (with a progress ring), and nothing else when the model isn't there.
+- Plush quality tiers: 32 fur shells (desktop), 24 (mid-range), 14 (phones), or no shells with a sheen material
+  on weak GPUs. The tier steps down automatically if frames drop.
 - Respects `prefers-reduced-motion` (smaller motion, no spin).
 - `touch-action: pan-y` keeps vertical page scrolling working on mobile while you tap or drag the mascot.
 
@@ -71,3 +74,28 @@ const mood = useMascot((s) => s.expression);  // subscribe in React UI
 `public/models/nidus-mascot.glb` is an export of the procedural model (static pose). Use it in Blender
 to sculpt or re-texture it, or in other engines. The website itself renders the procedural version so that every
 facial feature stays rigged.
+
+## Rigged plush character (`components/mascot/plush/`)
+
+Put a rigged model at `public/models/plush.glb` and the stage uses it automatically. If the file is
+missing or fails to load, the procedural mascot is shown instead. The public API is unchanged.
+
+**What the model should contain.** Everything is optional. Any layer whose bones, clips or blendshapes
+aren't found is switched off.
+
+| Layer | Needs in the GLB |
+| --- | --- |
+| State machine | Clips named like `idle`, `look_around`, `wave`, `happy_bounce`, `surprised`, `thinking`, `shy`, `talk_gesture`; extra `idle_*` clips become random idle variations; an optional `breathing` clip is played additively |
+| Look-at, balance, foot IK | Bones `Hips`, `Spine`, `Spine2`/`Chest`, `Neck`, `Head`, `LeftEye`/`RightEye`, `LeftUpLeg`/`LeftLeg`/`LeftFoot` (and the right-side equivalents). Mixamo, Rigify and `thigh.L`-style names all work |
+| Jiggle | Bones whose names contain `belly`, `hood`, `fluff`, `ear`, `tail` or `jiggle` |
+| Face | ARKit-style blendshapes (`eyeBlinkLeft`, `jawOpen`, `mouthSmileLeft`, `browInnerUp` …) and optional `viseme_aa`/`viseme_O`/`viseme_E` |
+| Fur | Meshes or materials whose names contain `fur`, `plush`, `body`, `fluff` or `hood`. Optional maps: `public/models/plush_fur_length.png` (R = length) and `plush_fur_flow.png` (RG = flow direction) |
+| Catch-lights | Meshes or materials whose names contain `eye`, `cornea` or `iris` |
+
+The name lists, look-at weights, spring settings, fur length/density and expression→blendshape
+mapping all live in `plush/rigConfig.ts`. Open the page with `?plush-debug` to log what was detected.
+Draco and KTX2 decoders are served from `public/decoders/`.
+
+Optional audio lip-sync: `setMascotLipSyncAudio(audioElement)` while it plays, then `null`. It estimates mouth
+shapes from loudness and frequency balance. That convinces at mascot scale but is not phoneme-accurate.
+Without audio, the mouth flaps procedurally while `say()` is showing a line.

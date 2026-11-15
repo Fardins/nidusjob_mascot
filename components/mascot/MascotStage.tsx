@@ -4,18 +4,47 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useMascot } from "./store";
+import { usePlushProgress } from "./plush/progress";
 import type { MascotCanvasProps } from "./MascotCanvas";
 
 // three.js only ships to the client, after hydration, in its own chunk.
 const MascotCanvas = dynamic(() => import("./MascotCanvas"), { ssr: false, loading: () => null });
 
-/** Lightweight CSS placeholder shown until the 3D scene's first frame. */
+/** Lightweight CSS placeholder shown until the 3D scene's first frame, with model download progress. */
 function Placeholder() {
+  const progress = usePlushProgress();
+  const r = 74;
+  const c = 2 * Math.PI * r;
   return (
-    <div className="absolute inset-0 grid place-items-center" aria-hidden>
+    <div className="absolute inset-0 grid place-items-center" aria-hidden={progress < 0}>
       <div className="relative h-40 w-40">
         <div className="absolute inset-0 rounded-full bg-brand-400/30 blur-2xl" />
         <div className="absolute inset-6 animate-pulse rounded-full bg-gradient-to-br from-brand-300 to-brand-600 opacity-70" />
+        {progress >= 0 && (
+          <svg
+            viewBox="0 0 160 160"
+            className="absolute inset-0 -rotate-90"
+            role="progressbar"
+            aria-label="Loading mascot"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(progress * 100)}
+          >
+            <circle cx="80" cy="80" r={r} fill="none" stroke="currentColor" strokeWidth="3" className="text-white/50" />
+            <circle
+              cx="80"
+              cy="80"
+              r={r}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeDasharray={c}
+              strokeDashoffset={c * (1 - progress)}
+              className="text-brand-500 transition-[stroke-dashoffset] duration-200"
+            />
+          </svg>
+        )}
       </div>
     </div>
   );
